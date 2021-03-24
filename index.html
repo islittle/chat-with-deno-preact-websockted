@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="telephone=no,email=no" name="format-detection">
+    <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Chat using Deno</title>
+    <style type="text/css">
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      body {
+        font-size: 14px;
+        line-height: 1.5;
+        padding-bottom: 100px;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+
+      }
+      .connect_info {
+        padding: 8px;
+      }
+      input, button {
+          border: 0 none;
+          vertical-align: middle;
+          appearance: none;
+          border-radius: 0;
+      }
+      form {
+        position: fixed;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+        display: -webkit-flex;
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+      }
+      input {
+          flex: 1;
+          margin-right: 10px;
+          border:1px solid #d2d2d2;
+          padding: 20px;
+          font-size: 16px;
+      }
+      input::-webkit-input-placeholder{
+          color: #cccccc!important;
+      }
+      input:-moz-placeholder{
+          color: #cccccc!important;
+      }
+      input::-moz-placeholder{
+          color: #cccccc!important;
+      }
+      input::-ms-input-placeholder{
+          color: #cccccc!important;
+      }
+      button {
+        background-color: #d87672;
+        color: #fff;
+        line-height: 44px;
+        padding: 0 20px;
+        border-radius: 6px;
+      }
+      .myMessage {
+        margin-left: 20px;
+        color: red;
+        text-align: right;
+      }
+      .otherMessage {
+        margin-right: 20px;
+        color: green;
+      }
+      .iphoneX{
+          padding-bottom: constant(safe-area-inset-bottom) !important;
+          padding-bottom: env(safe-area-inset-bottom) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" />
+    <script type="module">
+      import { html, render, useEffect, useState } from 'https://unpkg.com/htm/preact/standalone.module.js'
+
+      let ws
+
+      function Chat() {
+        // Messages
+        const [messages, setMessages] = useState([])
+        const onReceiveMessage = ({ data }) => {
+          setTimeout(()=> {
+            document.documentElement.scrollTop = document.querySelector('#app').offsetHeight + 1000
+          }, 150)
+          setMessages(m => ([...m, data]))
+        }
+        const onSendMessage = e => {
+          const msg = e.target[0].value
+
+          e.preventDefault()
+          ws.send(msg)
+          e.target[0].value = ''
+          setTimeout(()=> {
+            document.documentElement.scrollTop = document.querySelector('#app').offsetHeight + 1000
+          }, 150)
+        }
+
+        // Websocket connection + events
+        useEffect(() => {
+          try {
+            if (ws) ws.close()
+            ws = new WebSocket(`ws://${window.location.host}/ws`)
+            ws.addEventListener("message", onReceiveMessage)
+
+            return () => {
+              ws.removeEventListener("message", onReceiveMessage)
+            }
+          } catch (error) {
+             console.error(error)
+          }
+          
+        }, [])
+
+        let myId = ''
+        return html`
+          ${messages.map((message, i) => {
+            let isMy = false
+            if (message && i === 1 && !myId) {
+              const Reg = /(\w+?-)+\w+/ig
+              const execArray = message ? Reg.exec(message) : []
+              if (execArray && execArray.length) {
+                myId = execArray[0]
+              }
+            }
+            if (myId && message && message.indexOf(myId) !== -1) {
+              isMy = true
+            }
+
+            return isMy ? html`
+                <div class="connect_info"><p class="myMessage">${message}</p></div>
+              ` : html`
+                <div class="connect_info"><p class="otherMessage">${message}</p></div>
+              `
+          })}
+
+          <form onSubmit=${onSendMessage} class="iphoneX">
+           <input type="text" placeholder="输入啊~，回车也可以发送消息" />
+           <button>发送</button>
+          </form>
+        `
+      }
+
+      render(html`<${Chat} />`, document.getElementById('app'))
+    </script>
+  </body>
+</html>
