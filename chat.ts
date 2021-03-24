@@ -2,8 +2,7 @@
  * @Author: wangfeng
  * @Date: 2020-05-10 23:47:26
  * @LastAuthor: wangfeng
- * @lastTime: 2021-03-24 11:01:44
- * @FilePath: /yit-h5/Users/wangfeng/work/chat-with-deno-and-preact-master/chat.ts
+ * @lastTime: 2021-03-24 14:46:12
  */
 import {
   WebSocket,
@@ -44,7 +43,8 @@ export async function chat(ws: WebSocket): Promise<void> {
   // Register user connection
   users.set(userId, ws);
   broadcast(`欢迎用户${userId}进入聊天窗口`);
-  broadcast(`我是机器人，但是我想说：欢迎，欢迎，热烈欢迎${userId}小伙伴~`);
+  broadcast(`我是机器人，但是我想说：欢迎，欢迎，热烈欢迎${userId}~`);
+  broadcast(`${userId}用户，你是否看到了输入框？输入框在下面，提醒一下~`);
 
   // Wait for new messages
   for await (const event of ws) {
