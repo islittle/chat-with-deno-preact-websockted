@@ -2,9 +2,8 @@
  * @Author: wangfeng
  * @Date: 2020-05-10 23:47:26
  * @LastAuthor: wangfeng
- * @lastTime: 2021-03-24 11:11:58
+ * @lastTime: 2021-03-24 11:20:59
 -->
-# Chat with Deno + Preact
 # Chat based on Deno + preact + websockted Technology
 
 ## Getting started
